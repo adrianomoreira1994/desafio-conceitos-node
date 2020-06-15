@@ -20,14 +20,14 @@ app.get("/repositories", (request, response) => {
 
 app.post("/repositories", (request, response) => {
   try {
-    const { title, url, techs, likes } = request.body;
+    const { title, url, techs } = request.body;
 
     const repository = {
       id: uuid(),
+      likes: 0,
+      techs,
       title,
       url,
-      techs,
-      likes,
     };
 
     repositories.push(repository);
@@ -39,7 +39,7 @@ app.post("/repositories", (request, response) => {
 
 app.put("/repositories/:id", (request, response) => {
   try {
-    const { title, url, techs, likes } = request.body;
+    const { url, title, techs } = request.body;
     const { id } = request.params;
 
     const repository = {
@@ -47,7 +47,6 @@ app.put("/repositories/:id", (request, response) => {
       title,
       url,
       techs,
-      likes,
     };
 
     const repositoryIndex = repositories.findIndex(
@@ -58,9 +57,14 @@ app.put("/repositories/:id", (request, response) => {
       return response.status(400).send({ error: "Repository not found" });
     }
 
-    repositories[repositoryIndex] = repository;
+    const likes = repositories[repositoryIndex].likes;
 
-    return response.status(201).send(repository);
+    repositories[repositoryIndex] = {
+      ...repository,
+      likes,
+    };
+
+    return response.status(200).send(repositories[repositoryIndex]);
   } catch (error) {
     return response.status(500).send("Request Error : " + error.message);
   }
@@ -79,7 +83,7 @@ app.delete("/repositories/:id", (request, response) => {
 
     repositories.splice(repositoryIndex, 1);
 
-    return response.json();
+    return response.status(204).send();
   } catch (error) {
     return response.status(500).send("Request Error : " + error.message);
   }
@@ -95,7 +99,7 @@ app.post("/repositories/:id/like", (request, response) => {
   if (repositoryIndex < 0)
     return response.status(400).send({ error: "Repository not found" });
 
-  repositories[repositoryIndex].likes++;
+  repositories[repositoryIndex].likes += 1;
 
   return response.status(200).send(repositories[repositoryIndex]);
 });

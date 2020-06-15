@@ -38,13 +38,31 @@ app.post("/repositories", (request, response) => {
 });
 
 app.put("/repositories/:id", (request, response) => {
-  const { id } = request.params;
-  const repositoryIndex = repositories.findIndex(
-    (repository) => repository.id === id
-  );
+  try {
+    const { title, url, techs, likes } = request.body;
+    const { id } = request.params;
 
-  if (repositoryIndex < 0) {
-    return response.status(400).send({ error: "Repository is not found" });
+    const repository = {
+      id,
+      title,
+      url,
+      techs,
+      likes,
+    };
+
+    const repositoryIndex = repositories.findIndex(
+      (repository) => repository.id === id
+    );
+
+    if (repositoryIndex < 0) {
+      return response.status(400).send({ error: "Repository is not found" });
+    }
+
+    repositories[repositoryIndex] = repository;
+
+    return response.status(201).send(repository);
+  } catch (error) {
+    return response.status(500).send("Request Error : " + error.message);
   }
 });
 
